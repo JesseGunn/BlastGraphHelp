@@ -1,0 +1,92 @@
+---
+title: "Blast Graphing"
+author: "Jesse Gunn Cheu"
+date: "5.4.2024"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    df_print: paged
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+editor_options:
+  chunk_output_type: console
+---
+
+This notebook will help guide you through the steps of graphing your 
+Blasts in a visually appealing manner.
+
+The first step is to import neccesary packages we will use for graphing
+# Libraries
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+Here we have imported the packages ggplot and dplyr. ggplot is 
+important for graphing and dplyr is important for importing data.
+
+
+Now we need to import our data and create a dataframe
+# Import Data
+```{r}
+# This line imports the CSV file and creates the dataframe
+# It is important that you revise the directory and filename for the location of your file
+# Alternatively instead of adding a directory, you can simply change your working directory
+
+Blast_df <- read.csv("/School/biol325_evogeno/bison_help/file_test.csv", header = FALSE)
+
+
+# This line assigns column names based on the out format of the blasts
+# This would be suitable for the example -outfmt we have been using throughout this guide
+
+colnames(Blast_df) = c("Query", "Chromosome", "Start", "End", "Length", "Evalue")
+```
+
+And now we are all ready to make our graph!
+There are some key things to pay attention to here.
+Firstly the values you create within the aes() function will
+allow for easy to identify differences within datapoints which is seen
+in the first example figure.
+# Create graph 1
+```{r}
+# X = END --- so that no points are on the very end
+# y = Chromosome --- Y-axis chromosomes
+# color = Query --- query by coloe
+# size = Length --- big dot = longer alignment length
+# alpha = Evalue --- worse evalue = more transparent
+Blast_graph <- ggplot(Blast_df, aes(x = End, y = Chromosome, color = Query, size = Length, alpha = Evalue)) +
+  # plot points
+  geom_point(aes(x = Start)) +
+  # change theme
+  theme_classic() +
+  # Reverse evalue (lower is better here)
+  scale_alpha_continuous(trans = reverse_trans()) +
+  # Remove non-essential guides
+  guides(alpha = FALSE, size = FALSE) +
+  # Rename legend(s)
+  labs(color = "Gene") +
+  # label X
+  xlab("Position on chromosome")
+
+# Show graph
+Blast_graph
+```
+
+Here you can view the count of the number of hits by
+a variable of your choosing
+# Create graph 2
+```{r}
+# x = Query --- this is the x-axis variable
+# y = ..count.. --- count totals
+# color = length --- this is the variable that will create legend
+
+Blast_bargraph <- ggplot(Blast_df, aes(x = Query, y = ..count.., fill = Chromosome)) +
+  geom_bar(stat = "count") +
+  # change theme
+  theme_classic()
+
+Blast_bargraph
+```
+
+Thanks for checking this out!
